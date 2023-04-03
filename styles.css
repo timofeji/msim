@@ -1,0 +1,23 @@
+body {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #222;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+#output {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+#output p {
+  margin: 0;
+}
+
+.player {
+  color: #f00;
+}
