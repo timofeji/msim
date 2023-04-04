@@ -1,10 +1,13 @@
-import Player from "./game/player.js";
-import Terrain from "./game/terrain.js";
-import Render from "./game/render.js";
+import Player from "./simulation/player.js";
+import Terrain from "./simulation/terrain.js";
+import Render from "./simulation/render.js";
 
-const output = document.getElementById("game-canvas");
+const canvas = document.getElementById("game-canvas");
+var ctx = canvas.getContext("2d");
+canvas.font = "30px Arial";
+canvas.strokeText("Hello World", 10, 50);
 
-const renderer = new Render(output);
+const renderer = new Render(canvas);
 var player = new Player(renderer);
 var terrain = new Terrain(player);
 
@@ -28,6 +31,7 @@ function handleInput(e) {
 
 window.requestAnimationFrame = () => {
   terrain.update();
+  
 }
 
 

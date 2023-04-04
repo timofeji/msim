@@ -1,5 +1,6 @@
 // Object that maps each Hanzi character to a color
 const types = {
+  人: '#ff0000', // person - red
   平: '#8BC34A', // flat terrain - light green
   山: '#5D4037', // mountain terrain - dark brown
   水: '#2196F3', // water terrain - blue
