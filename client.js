@@ -1,49 +1,34 @@
-import Player from './player.js';
-import Terrain from './terrain.js';
+import Player from "./game/player.js";
+import Terrain from "./game/terrain.js";
+import Render from "./game/render.js";
 
-const playerCharacter = '⛹';
-const player = new Player(2, 2);
+const output = document.getElementById("game-canvas");
 
-const terrain = new Terrain(30, 30);
-displayWorld();
+const renderer = new Render(output);
+var player = new Player(renderer);
+var terrain = new Terrain(player);
 
-function displayWorld() {
-  const output = document.getElementById('output');
-  output.innerHTML = '';
-
-  const lines = [];
-  terrain.map.forEach((row, y) => {
-    let line = '';
-    row.forEach((cell, x) => {
-      if (player.x === x && player.y === y) {
-        line += `<span class="player">${playerCharacter}</span>`;
-      } else {
-        line += cell;
-      }
-    });
-    lines.push(line);
-  });
-
-  output.innerHTML = lines.map(line => `<p>${line}</p>`).join('');
-}
-
-document.addEventListener('keydown', handleInput);
-
-function handleInput(event) {
-  switch (event.key.toUpperCase()) {
-    case 'W':
-      player.moveUp();
+function handleInput(e) {
+  const key = e.key.toLowerCase();
+  switch (key) {
+    case "w":
+      player.move(0, -1);
       break;
-    case 'A':
-      player.moveLeft();
+    case "a":
+      player.move(-1, 0);
       break;
-    case 'S':
-      player.moveDown();
+    case "s":
+      player.move(0, 1);
       break;
-    case 'D':
-      player.moveRight();
+    case "d":
+      player.move(1, 0);
       break;
   }
-
-  displayWorld();
 }
+
+window.requestAnimationFrame = () => {
+  terrain.update();
+}
+
+
+document.addEventListener("keydown", handleInput);
