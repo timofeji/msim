@@ -1,13 +1,21 @@
-const tileSize = 26;
-
+const tileSize = 20;
 
 const canvas = document.getElementById("game-canvas");
 const inputBox = document.getElementById('game-input');
 
 var ctx = canvas.getContext("2d");
-ctx.font = `${tileSize}px 'Courier New', monospace`; // Use a monospace font
-ctx.textBaseline = 'middle'; // Adjust text rendering
-ctx.textAlign = 'center';
+// ctx.font = `${tileSize}px 'Courier New', monospace`; // Use a monospace font
+// ctx.textBaseline = 'middle'; // Adjust text rendering
+// ctx.textAlign = 'center';
+
+ // Define the padding values
+ const paddingRatio = 0.4;
+ const xPadding = tileSize * paddingRatio;
+ const yPadding = tileSize * paddingRatio;
+
+ // Adjust the character size to include the padding
+ ctx.font = `${tileSize} Verdana`;
+ ctx.textBaseline = 'top';
 
 
 const testGrid = [
@@ -28,8 +36,8 @@ const testGrid = [
   ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
   ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
   ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
-  ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
-  ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
+  ["山", "山", "山", "山", "A", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
+  ["山", "山", "山", "山", "B", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
   ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
   ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
   ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
@@ -40,19 +48,29 @@ const testGrid = [
 
 
 
-function getTerrainColor(character) {
-  switch (character) {
-    case "山":
-      return "rgb(128, 128, 128)"; // Mountain: Gray
-    case "水":
-      return "rgb(0, 0, 255)"; // Water: Blue
-    case "田":
-      return "rgb(0, 255, 0)"; // Farmland: Green
-    case "木":
-      return "rgb(34, 139, 0)"; // Forest: Dark green
-    default:
-      return "rgb(0, 0, 0)"; // Default: Black
-  }
+function getTerrainColor(char) {
+  // Get the current time in seconds
+  const currentTime = new Date().getTime() / 1000;
+
+  // Calculate the color offset based on the current time
+  const colorOffset = Math.floor(currentTime * 50) % 360;
+
+  // Define the base hue for each character type
+  const baseHue = {
+    山: 0, // Red
+    水: 240, // Blue
+    田: 120, // Green
+    木: 60, // Yellow-Green
+    人: 300, // Purple
+    房: 180, // Cyan
+    市: 30, // Orange
+  };
+
+  // Calculate the new hue based on the base hue and color offset
+  const newHue = (baseHue[char] + colorOffset) % 360;
+
+  // Return the new color as an HSL value
+  return `hsl(${newHue}, 100%, 50%)`;
 }
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -62,7 +80,7 @@ function render() {
       const xPos = x * tileSize;
       const yPos = y * tileSize;
       ctx.fillStyle = getTerrainColor(character);
-      ctx.fillText(character, xPos, yPos, tileSize);
+      ctx.fillText(character, xPos, yPos);
     }
   }
 
