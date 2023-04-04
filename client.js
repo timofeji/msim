@@ -1,3 +1,5 @@
+import { simulation_types } from "./simulation/types.js";
+
 const tileSize = 20;
 
 const canvas = document.getElementById("game-canvas");
@@ -14,8 +16,8 @@ var ctx = canvas.getContext("2d");
  const yPadding = tileSize * paddingRatio;
 
  // Adjust the character size to include the padding
- ctx.font = `${tileSize} Verdana`;
- ctx.textBaseline = 'top';
+ ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
+ ctx.textBaseline = "top";
 
 
 const testGrid = [
@@ -48,30 +50,37 @@ const testGrid = [
 
 
 
+// function getTerrainColor(char) {
+//   // Get the current time in seconds
+//   const currentTime = new Date().getTime() / 1000;
+
+//   // Calculate the color offset based on the current time
+//   const colorOffset = Math.floor(currentTime * 50) % 360;
+
+//   // Define the base hue for each character type
+//   const baseHue = {
+//     山: 0, // Red
+//     水: 240, // Blue
+//     田: 120, // Green
+//     木: 60, // Yellow-Green
+//     人: 300, // Purple
+//     房: 180, // Cyan
+//     市: 30, // Orange
+//   };
+
+//   // Calculate the new hue based on the base hue and color offset
+//   const newHue = (baseHue[char] + colorOffset) % 360;
+
+//   // Return the new color as an HSL value
+//   return `hsl(${newHue}, 100%, 50%)`;
+// }
+
 function getTerrainColor(char) {
-  // Get the current time in seconds
-  const currentTime = new Date().getTime() / 1000;
-
-  // Calculate the color offset based on the current time
-  const colorOffset = Math.floor(currentTime * 50) % 360;
-
-  // Define the base hue for each character type
-  const baseHue = {
-    山: 0, // Red
-    水: 240, // Blue
-    田: 120, // Green
-    木: 60, // Yellow-Green
-    人: 300, // Purple
-    房: 180, // Cyan
-    市: 30, // Orange
-  };
-
-  // Calculate the new hue based on the base hue and color offset
-  const newHue = (baseHue[char] + colorOffset) % 360;
-
-  // Return the new color as an HSL value
-  return `hsl(${newHue}, 100%, 50%)`;
+  return simulation_types[char] || "black";
 }
+
+
+
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let y = 0; y < testGrid.length; y++) {
@@ -83,10 +92,6 @@ function render() {
       ctx.fillText(character, xPos, yPos);
     }
   }
-
-  window.requestAnimationFrame(() => {
-    render();
-  });
 }
 
 
@@ -121,4 +126,4 @@ window.addEventListener('resize', () => {
 });
 
 setCanvasSize();
-render();
+setInterval(render, 500);
