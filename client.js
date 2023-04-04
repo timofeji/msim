@@ -19,6 +19,8 @@ var ctx = canvas.getContext("2d");
  ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
  ctx.textBaseline = "top";
 
+const commandBuffer = [];
+
 
 const testGrid = [
   ["山", "山", "山", "山", "山", "山", "山", "山", "山", "山", "木", "木", "木", "木", "木", "木", "木", "木", "木", "木", "田", "田", "田", "田", "田", "田", "田", "田", "田", "田", "水", "水", "水", "水", "水", "水", "水", "水", "水", "水"],
@@ -95,25 +97,31 @@ function render() {
 }
 
 
-function handleInput(e) {
-  const key = e.key.toLowerCase();
-  switch (key) {
-    case "w":
-      player.move(0, -1);
-      break;
-    case "a":
-      player.move(-1, 0);
-      break;
-    case "s":
-      player.move(0, 1);
-      break;
-    case "d":
-      player.move(1, 0);
-      break;
-  }
+function handleInput(inputText) {
+  // Remove leading and trailing whitespace and split the input into words
+  const words = inputText.trim().split(/\s+/);
+  const commandName = words[0].toLowerCase();
+  const args = words.slice(1);
+
+  // Create a command object with the command name and arguments
+  const command = {
+    name: commandName,
+    args: args,
+  };
+
+  // Add the command object to the command buffer
+  commandBuffer.push(command);
+
+  console.log(commandBuffer);
 }
 
-document.addEventListener("keydown", handleInput);
+inputBox.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    handleInput(inputBox.value);
+    inputBox.value = '';
+  }
+});
 
 function setCanvasSize() {
   const inputBoxHeight = inputBox.getBoundingClientRect().height;
@@ -127,3 +135,23 @@ window.addEventListener('resize', () => {
 
 setCanvasSize();
 setInterval(render, 500);
+
+async function processCommands() {
+  while (commandBuffer.length > 0) {
+    const command = commandBuffer.shift();
+    const response = await fetch('/process-command', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(command),
+    });
+
+    // Handle the response from the server
+    const result = await response.json();
+    console.log(result);
+  }
+}
+
+// Call the processCommands function periodically
+setInterval(processCommands, 1000);
