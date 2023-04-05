@@ -1,5 +1,31 @@
 import SimplexNoise from 'simplex-noise';
 
+
+// function getTerrainColor(char) {
+//   // Get the current time in seconds
+//   const currentTime = new Date().getTime() / 1000;
+
+//   // Calculate the color offset based on the current time
+//   const colorOffset = Math.floor(currentTime * 50) % 360;
+
+//   // Define the base hue for each character type
+//   const baseHue = {
+//     山: 0, // Red
+//     水: 240, // Blue
+//     田: 120, // Green
+//     木: 60, // Yellow-Green
+//     人: 300, // Purple
+//     房: 180, // Cyan
+//     市: 30, // Orange
+//   };
+
+//   // Calculate the new hue based on the base hue and color offset
+//   const newHue = (baseHue[char] + colorOffset) % 360;
+
+//   // Return the new color as an HSL value
+//   return `hsl(${newHue}, 100%, 50%)`;
+// }
+
 class Terrain {
   constructor(seed, chunkSize, chunkCount) {
     this.width = width;

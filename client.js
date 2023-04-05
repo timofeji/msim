@@ -20,8 +20,6 @@ var ctx = canvas.getContext("2d");
  const yPadding = tileSize * paddingRatio;
 
  // Adjust the character size to include the padding
- ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
- ctx.textBaseline = "top";
 
 var commandBuffer = [];
 var worldArray;
@@ -30,51 +28,17 @@ async function fetchWorldData() {
   const response = await fetch('/world');
   worldArray = await response.json();
 
-  // Trigger the render function to render the worldArray data
-
   render();
 }
 fetchWorldData();
 
 
-// function getTerrainColor(char) {
-//   // Get the current time in seconds
-//   const currentTime = new Date().getTime() / 1000;
-
-//   // Calculate the color offset based on the current time
-//   const colorOffset = Math.floor(currentTime * 50) % 360;
-
-//   // Define the base hue for each character type
-//   const baseHue = {
-//     山: 0, // Red
-//     水: 240, // Blue
-//     田: 120, // Green
-//     木: 60, // Yellow-Green
-//     人: 300, // Purple
-//     房: 180, // Cyan
-//     市: 30, // Orange
-//   };
-
-//   // Calculate the new hue based on the base hue and color offset
-//   const newHue = (baseHue[char] + colorOffset) % 360;
-
-//   // Return the new color as an HSL value
-//   return `hsl(${newHue}, 100%, 50%)`;
-// }
 
 function getTerrainColor(char) {
   return simulation_types[char] || "black";
 }
-
-function updateTimestamp() {
-  const timestampElement = document.getElementById('timestamp');
-  const unixTimestamp = Math.floor(Date.now() / 1000);
-  timestampElement.textContent = unixTimestamp;
-}
-setInterval(updateTimestamp, 1000);
-
 function isCellSelected(cell) {
-  if (!selectionRectangle.start || !selectionRectangle.end) return false;
+  if (!isMouseDown) return false;
 
   const minX = Math.min(selectionRectangle.start.x, selectionRectangle.end.x);
   const maxX = Math.max(selectionRectangle.start.x, selectionRectangle.end.x);
@@ -93,6 +57,9 @@ function render() {
     for (const cell of worldArray) {
       const [x, y, character] = cell.split(",");
       const isSelected = isCellSelected({ x, y });
+
+      ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
+      ctx.textBaseline = "bottom";
       ctx.fillStyle = isSelected ? "white" : getTerrainColor(character);
       ctx.rect(x, y, tileSize, tileSize);
       ctx.fillText(character, x * tileSize, y * tileSize);
@@ -123,6 +90,7 @@ function handleMouseDown(event) {
     selectionRectangle.start = cell;
     selectionRectangle.end = cell;
   }
+
 }
 
 function handleMouseMove(event) {
@@ -182,7 +150,6 @@ window.addEventListener('resize', () => {
 });
 
 setCanvasSize();
-// setInterval(render, 500);
 
 async function processCommands() {
   while (commandBuffer.length > 0) {
@@ -200,21 +167,13 @@ async function processCommands() {
     console.log(result);
   }
 }
-setInterval(processCommands, 1000);
+function updateTimestamp() {
+  const timestampElement = document.getElementById('timestamp');
+  const unixTimestamp = Math.floor(Date.now() / 1000);
+  timestampElement.textContent = unixTimestamp;
 
-function getCursorPosition(canvas, event) {
-  const rect = canvas.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  return { x: x, y: y };
-}
 
-function getCellAtPosition(mousePos) {
-  const cellX = Math.floor(mousePos.x / tileSize);
-  const cellY = Math.floor(mousePos.y / tileSize);
-  if (cellX >= 0 && cellX < tileSize && cellY >= 0 && cellY < tileSize) {
-    return { x: cellX, y: cellY };
-  } else {
-    return null;
-  }
+  processCommands();
 }
+setInterval(updateTimestamp, 1000);
+
