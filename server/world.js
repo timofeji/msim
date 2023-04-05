@@ -5,8 +5,10 @@ const CHUNK_SIZE = 10; // Define your desired chunk size
 const fs = require('fs');
 
 class WorldView {
-  constructor(playerID, viewWidth, viewHeight) {
+  constructor(playerID, X, Y, viewWidth, viewHeight) {
     this.player = playerID;
+    this.x = X;
+    this.y = Y;
     this.viewWidth = viewWidth;
     this.viewHeight = viewHeight;
     this.visibleChunks = new Map();
@@ -32,8 +34,8 @@ class WorldView {
   }
 
   getChunkIdsInView() {
-    const topLeftChunk = this.world.getChunkId({ x: this.player.x - this.viewWidth / 2, y: this.player.y - this.viewHeight / 2 });
-    const bottomRightChunk = this.world.getChunkId({ x: this.player.x + this.viewWidth / 2, y: this.player.y + this.viewHeight / 2 });
+    const topLeftChunk = this.world.getChunkId({ x: this.x - this.viewWidth / 2, y: this.y - this.viewHeight / 2 });
+    const bottomRightChunk = this.world.getChunkId({ x: this.x + this.viewWidth / 2, y: this.y + this.viewHeight / 2 });
   
     const [topLeftChunkX, topLeftChunkY] = topLeftChunk.split(',').map(Number);
     const [bottomRightChunkX, bottomRightChunkY] = bottomRightChunk.split(',').map(Number);
