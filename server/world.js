@@ -4,13 +4,14 @@ const CHUNK_SIZE = 10; // Define your desired chunk size
 
 const fs = require('fs');
 class WorldView {
-  constructor(playerID, X, Y, viewWidth, viewHeight) {
+  constructor(playerID, X, Y, viewWidth, viewHeight, world) {
     this.player = playerID;
     this.x = X;
     this.y = Y;
     this.viewWidth = viewWidth;
     this.viewHeight = viewHeight;
     this.visibleChunks = new Map();
+    this.world = world;
   }
 
   async updateVisibleChunks() {

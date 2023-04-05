@@ -29,7 +29,7 @@ app.get("/world", async (req, res) => {
   // Check if there's already a WorldView instance for this playerID
   if (!worldViews[playerID]) {
     // Initialize a WorldView instance and store it in the worldViews object
-    worldViews[playerID] = new WorldView(playerID, viewWidth, viewHeight);
+    worldViews[playerID] = new WorldView(playerID, viewWidth, viewHeight, world);
   }
 
   // Get the slice of world data for the playerID
