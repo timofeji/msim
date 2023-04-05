@@ -1,4 +1,4 @@
-import { simulation_types } from "./simulation/types.js";
+import { SIMULATION_TYPES } from "./server/simtypes.js";
 
 const tileSize = 20;
 const canvas = document.getElementById("game-canvas");
@@ -16,14 +16,15 @@ async function fetchWorldData() {
   const viewWidth = Math.ceil(canvas.width / tileSize);
   const viewHeight = Math.ceil(canvas.height / tileSize);
   const playerID = 1; // Replace this with a unique identifier for the player
-
+  const x = 10;
+  const y = 10;
 
   const response = await fetch("/world", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ playerID, viewWidth, viewHeight }),
+    body: JSON.stringify({ playerID, viewWidth, viewHeight, x, y }),
   });
   if (response.ok) {
     worldArray = await response.json();
@@ -36,7 +37,7 @@ async function fetchWorldData() {
 fetchWorldData();
 
 function getTerrainColor(char) {
-  return simulation_types[char] || "black";
+  return SIMULATION_TYPES[char] || "black";
 }
 function isCellSelected(cell) {
   if (!isMouseDown) return false;
@@ -166,7 +167,7 @@ async function processCommands() {
 
     // Handle the response from the server
     const result = await response.json();
-    console.log(result.world);
+    console.log(result.w);
   }
 }
 function updateTimestamp() {

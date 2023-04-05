@@ -1,9 +1,27 @@
+/*
+ * Copyright (c) 2023 MSIM. All rights reserved.
+ *
+ * Author: Timofej Jermolaev
+ * 
+ * Purpose: The purpose of this file is to represent the world
+ * We define two classes, World and WorldView:
+ *    World represents a chunking system that divides the game simulation into 
+ *    infinite parcels called 'Chunks,' each chunk is saved to file and represents a 
+ *    square matrix of size CHUNK_SIZE^2 
+ *    
+ *    WorldView represents a single in memory slice of the world that the player can read/write
+ *    the world through. It's also responsible for loading world chunks. We load a sliding kernel of world chunks
+ *    around the players coordinates as the player moves.
+ *    
+ */
+
 
 const CHUNK_SIZE = 10; // Define your desired chunk size
 
 
 const fs = require('fs');
 const path = require('path');
+const { createNoise2D } = require('simplex-noise');
 
 class WorldView {
   constructor(X, Y, viewWidth, viewHeight, world) {
@@ -17,18 +35,6 @@ class WorldView {
 
   }
 
-  //   async updateVisibleChunks() {
-  //     this.visibleChunks = [];
-  //     const chunkIds = this.getChunkIdsInView();
-  //     for (let i = 0; i < chunkIds.length; i++) {
-  //       try {
-  //         const chunkData = await this.world.getChunk(chunkIds[i]);
-  //         this.visibleChunks.push(chunkData);
-  //       } catch (error) {
-  //         console.error(`Error loading chunk ${chunkIds[i]}:`, error);
-  //       }
-  //     }
-  //   }
   updateVisibleChunks() {
     const chunkIdsInView = this.getChunkIdsInView();
 
@@ -109,15 +115,8 @@ class World {
 
   saveChunkData(chunkId, chunkData) {
     const chunkFilePath = path.join(this.chunksDirectory, `${chunkId}.txt`);
-
-    // Convert the chunkData object to a string
-    let chunkDataString = "";
-    for (const [cord, cell] of Object.entries(chunkData)) {
-      chunkDataString += `${cord},${cell}\n`;
-    }
-
     // Write the chunk data string to a file
-    fs.writeFileSync(chunkFilePath, chunkDataString);
+    fs.writeFileSync(chunkFilePath, chunkData);
   }
 
   loadChunkData(chunkId) {
@@ -141,35 +140,42 @@ class World {
   }
 
   generateDefaultChunkData() {
-    const defaultChar = "空";
+    var defaultChar = "空";
+    const noise2D = createNoise2D();
     let chunkData = "";
-    for (let row = 0; row < CHUNK_SIZE; row++) {
-      for (let col = 0; col < CHUNK_SIZE; col++) {
-        chunkData += defaultChar;
+    for (let i = 0; i < CHUNK_SIZE * CHUNK_SIZE; i++) {
+      chunkData += defaultChar;
+      const nx = i / CHUNK_SIZE;
+      const ny = nx / CHUNK_SIZE;
+      let elevation = noise2D(nx, ny);
+      if (elevation > 0) {
+        defaultChar = "田";
+      } else if (elevation > 0.4) {
+        defaultChar = "山";
+      } else if (elevation > -0.2) {
+        defaultChar = "木";
+      } else {
+        defaultChar = "水";
       }
-      if (row < CHUNK_SIZE - 1) {
+      if ((i + 1) % CHUNK_SIZE == 0) {
         chunkData += "\n";
       }
     }
     return chunkData;
   }
-  getCellData(world, x, y) {
-
+  getCellData(x, y) {
     let chunkX = Math.floor(x / CHUNK_SIZE);
+
     let chunkY = Math.floor(y / CHUNK_SIZE);
 
     let cellX = x % CHUNK_SIZE;
     let cellY = y % CHUNK_SIZE;
 
+    console.log(`${x},${y}`);
 
     if (this.chunks.hasOwnProperty(`${chunkX},${chunkY}`)) {
-      let chunk = world.chunks[`${chunkX},${chunkY}`];
-
-    console.log(chunk);
-      let cell = chunk.cells[`${cellX},${cellY}`];
-      if (cell) {
-        return cell;
-      }
+      let chunk = this.chunks[`${chunkX},${chunkY}`];
+      return chunk;
     }
     return "error chunk";
   }

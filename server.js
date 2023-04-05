@@ -26,9 +26,6 @@ const worldViews = {};
 app.post("/world", async (req, res) => {
   const { playerID, viewWidth, viewHeight, x, y } = req.body;
 
-
-
-    console.log(x)
   // Check if there's already a WorldView instance for this playerID
   if (!worldViews[playerID]) {
     // Initialize a WorldView instance and store it in the worldViews object
@@ -79,7 +76,6 @@ function broadcast(message, sender) {
     }
   });
 }
-
 
 
 const PORT = process.env.PORT || 8080;

@@ -1,5 +1,5 @@
 // Object that maps each Hanzi character to a color
-export const simulation_types = {
+export const SIMULATION_TYPES = {
   人: "red", // person - red
   山: "gray", // mountain
   水: "blue",
