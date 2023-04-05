@@ -69,6 +69,7 @@ class World {
   constructor() {
     this.chunks = {};
     this.players = {};
+    this.chunksDirectory = "chunks/";
   }
 
   getChunkId(position) {
@@ -97,36 +98,41 @@ class World {
 
   saveChunkData(chunkId, chunkData) {
     const chunkFilePath = path.join(this.chunksDirectory, `${chunkId}.txt`);
-  
+
     // Convert the chunkData object to a string
-    let chunkDataString = '';
+    let chunkDataString = "";
     for (const [cord, cell] of Object.entries(chunkData)) {
       chunkDataString += `${cord},${cell}\n`;
     }
-  
+
     // Write the chunk data string to a file
     fs.writeFileSync(chunkFilePath, chunkDataString);
   }
 
-  async loadChunkData(chunkId) {
-    const chunksDir = path.join(__dirname, "chunks");
-    const chunkPath = path.join(chunksDir, `${chunkId}.txt`);
+  loadChunkData(chunkId) {
+    const chunkFilePath = path.join(this.chunksDirectory, `${chunkId}.txt`);
 
-    // Create the 'chunks' directory if it doesn't exist
-    if (!fs.existsSync(chunksDir)) {
-      fs.mkdirSync(chunksDir);
+    if (!fs.existsSync(chunkFilePath)) {
+      // If the file doesn't exist, generate default chunk data and save it
+      const defaultChunkData = this.generateDefaultChunkData(chunkId);
+      this.saveChunkData(chunkId, defaultChunkData);
+      return defaultChunkData;
+    } else {
+      // If the file exists, read it and return the chunk data
+      const fileContent = fs.readFileSync(chunkFilePath, "utf8");
+      const lines = fileContent.split("\n").filter((line) => line);
+
+      const chunkData = {};
+      lines.forEach((line) => {
+        const [cord, cell] = line.split(",");
+        chunkData[cord] = cell;
+      });
+
+      return chunkData;
     }
-
-    if (!fs.existsSync(chunkPath)) {
-      const defaultChunkData = this.generateEmptyChunk();
-      fs.writeFileSync(chunkPath, defaultChunkData, "utf8");
-    }
-
-    const chunkData = fs.readFileSync(chunkPath, "utf8");
-    return chunkData;
   }
 
-  generateEmptyChunk() {
+  generateDefaultChunkData() {
     const defaultChar = "空";
     let chunkData = "";
     for (let row = 0; row < CHUNK_SIZE; row++) {
