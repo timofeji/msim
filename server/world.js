@@ -164,20 +164,20 @@ class World {
     return chunkData;
   }
   getCellData(x, y) {
-    let chunkX = Math.floor(x / CHUNK_SIZE);
+    const chunkX = Math.floor(x / CHUNK_SIZE);
+    const chunkY = Math.floor(y / CHUNK_SIZE);
+    const chunkKey = `${chunkX},${chunkY}`;
 
-    let chunkY = Math.floor(y / CHUNK_SIZE);
 
-    let cellX = x % CHUNK_SIZE;
-    let cellY = y % CHUNK_SIZE;
-
-    console.log(`${x},${y}`);
-
-    if (this.chunks.hasOwnProperty(`${chunkX},${chunkY}`)) {
-      let chunk = this.chunks[`${chunkX},${chunkY}`];
-      return chunk;
+    if (this.chunks.hasOwnProperty(chunkKey)) {
+      const chunk = this.chunks[chunkKey];
+      const localX = x % CHUNK_SIZE;
+      const localY = y % CHUNK_SIZE;
+      const index = localY * CHUNK_SIZE + localX;
+      return chunk.charAt(index);
+    } else {
+      return "error chunk";
     }
-    return "error chunk";
   }
 }
 

@@ -52,23 +52,43 @@ function isCellSelected(cell) {
   );
 }
 
+const CHUNK_SIZE = 10;
+
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (worldArray) {
-    for (const cell of worldArray) {
-      console.log(cell);
-      // const [x, y, character] = cell.split(",");
-      // const isSelected = isCellSelected({ x, y });
+    const numRows = worldArray.filter(char => char === '\n').length + 1;
 
-      // ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
-      // ctx.textBaseline = "bottom";
-      // ctx.fillStyle = isSelected ? "white" : getTerrainColor(character);
-      
-      // ctx.fillText(character, x * tileSize, y * tileSize);
+    let x = 0;
+    let y = 0;
+
+    ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
+    ctx.textBaseline = "bottom";
+
+    for (let i = 0, len = worldArray.length; i < len; i++) {
+      const char = worldArray[i];
+
+      if (char === '\n') {
+        x = 0;
+        y++;
+      } else {
+        const isSelected = isCellSelected({ x, y });
+        ctx.fillStyle = isSelected ? "white" : getTerrainColor(char);
+
+        ctx.fillText(char, x * tileSize, y * tileSize);
+        x++;
+
+        if (x >= CHUNK_SIZE) {
+          x = 0;
+          y++;
+        }
+      }
     }
   }
 }
+
+
 
 let isMouseDown = false;
 
@@ -178,5 +198,5 @@ function updateTimestamp() {
 
   processCommands();
 }
-setInterval(updateTimestamp, 1000);
+// setInterval(updateTimestamp, 1000);
 
