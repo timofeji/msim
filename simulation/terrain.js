@@ -27,26 +27,26 @@ import SimplexNoise from 'simplex-noise';
 // }
 
 class Terrain {
-  constructor(seed, chunkSize, chunkCount) {
+  constructor(seed, CHUNK_SIZE, chunkCount) {
     this.width = width;
     this.height = height;
     this.heightmap = [];
     this.generateHeightmap();
     this.seed = seed;
-    this.chunkSize = chunkSize;
+    this.CHUNK_SIZE = CHUNK_SIZE;
     this.chunkCount = chunkCount;
     this.simplex = new SimplexNoise(this.seed);
     this.chunks = {};
   }
 
   generateChunk(chunkX, chunkY) {
-    const startX = chunkX * this.chunkSize;
-    const startY = chunkY * this.chunkSize;
+    const startX = chunkX * this.CHUNK_SIZE;
+    const startY = chunkY * this.CHUNK_SIZE;
 
     const map = [];
-    for (let y = 0; y < this.chunkSize; y++) {
+    for (let y = 0; y < this.CHUNK_SIZE; y++) {
       map[y] = [];
-      for (let x = 0; x < this.chunkSize; x++) {
+      for (let x = 0; x < this.CHUNK_SIZE; x++) {
         const nx = (startX + x) / 50;
         const ny = (startY + y) / 50;
         const elevation = this.simplex.noise2D(nx, ny);
@@ -69,10 +69,10 @@ class Terrain {
   }
 
   getTile(x, y) {
-    const chunkX = Math.floor(x / this.chunkSize);
-    const chunkY = Math.floor(y / this.chunkSize);
-    const tileX = x % this.chunkSize;
-    const tileY = y % this.chunkSize;
+    const chunkX = Math.floor(x / this.CHUNK_SIZE);
+    const chunkY = Math.floor(y / this.CHUNK_SIZE);
+    const tileX = x % this.CHUNK_SIZE;
+    const tileY = y % this.CHUNK_SIZE;
     const chunkId = this.getChunkId(chunkX, chunkY);
     if (!this.chunks[chunkId]) {
       this.generateChunk(chunkX, chunkY);

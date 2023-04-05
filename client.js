@@ -15,7 +15,7 @@ var worldArray;
 async function fetchWorldData() {
   const viewWidth = Math.ceil(canvas.width / tileSize);
   const viewHeight = Math.ceil(canvas.height / tileSize);
-  const playerID = "player1"; // Replace this with a unique identifier for the player
+  const playerID = 1; // Replace this with a unique identifier for the player
 
 
   const response = await fetch("/world", {
@@ -56,14 +56,15 @@ function render() {
 
   if (worldArray) {
     for (const cell of worldArray) {
-      const [x, y, character] = cell.split(",");
-      const isSelected = isCellSelected({ x, y });
+      console.log(cell);
+      // const [x, y, character] = cell.split(",");
+      // const isSelected = isCellSelected({ x, y });
 
-      ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
-      ctx.textBaseline = "bottom";
-      ctx.fillStyle = isSelected ? "white" : getTerrainColor(character);
+      // ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
+      // ctx.textBaseline = "bottom";
+      // ctx.fillStyle = isSelected ? "white" : getTerrainColor(character);
       
-      ctx.fillText(character, x * tileSize, y * tileSize);
+      // ctx.fillText(character, x * tileSize, y * tileSize);
     }
   }
 }

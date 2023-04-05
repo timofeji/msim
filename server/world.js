@@ -4,14 +4,14 @@ const CHUNK_SIZE = 10; // Define your desired chunk size
 
 const fs = require('fs');
 class WorldView {
-  constructor(playerID, X, Y, viewWidth, viewHeight, world) {
-    this.player = playerID;
+  constructor( X, Y, viewWidth, viewHeight, world) {
     this.x = X;
     this.y = Y;
     this.viewWidth = viewWidth;
     this.viewHeight = viewHeight;
     this.visibleChunks = new Map();
     this.world = world;
+    this.updateVisibleChunks();
   }
 
   async updateVisibleChunks() {
@@ -61,8 +61,8 @@ class WorldView {
 
     for (let x = startX; x < endX; x++) {
       for (let y = startY; y < endY; y++) {
-        const cell = this.getCell(x, y);
-        cells.push({ x, y, char: cell });
+        const cell = await this.world.getCellData(x, y);
+        cells.push(cell);
       }
     }
 
@@ -103,13 +103,35 @@ class World {
 
   generateEmptyChunk() {
     const chunkData = {};
-    for (let x = 0; x < chunkSize; x++) {
-      for (let y = 0; y < chunkSize; y++) {
+    for (let x = 0; x < CHUNK_SIZE; x++) {
+      for (let y = 0; y < CHUNK_SIZE; y++) {
         const cellId = `${x},${y}`;
-        chunkData[cellId] = defaultCharacter;
+        chunkData[cellId] = "Z";
       }
     }
     return chunkData;
+  }
+
+  async getCellData(x, y) {
+
+    const chunkId = this.getChunkId(x, y);
+    const chunk = this.chunks[chunkId];
+
+    // If the chunk is not loaded, return a default character
+    if (!chunk) {
+      return "chunk error";
+    }
+
+    const localX = x % CHUNK_SIZE;
+    const localY = y % CHUNK_SIZE;
+
+    // If the coordinates are within the loaded chunk, return the character at that position
+    if (chunk[localX] && chunk[localX][localY]) {
+      return chunk[localX][localY];
+    }
+
+    // If the coordinates are outside of the loaded chunk, return a default character
+    return "Z";
   }
 
 }

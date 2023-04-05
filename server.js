@@ -23,19 +23,18 @@ app.use(bodyParser.json());
 const worldViews = {};
 
 // Define a route to serve the game world data
-app.get("/world", async (req, res) => {
+app.post("/world", async (req, res) => {
   const { viewWidth, viewHeight, playerID } = req.body;
-
   // Check if there's already a WorldView instance for this playerID
   if (!worldViews[playerID]) {
     // Initialize a WorldView instance and store it in the worldViews object
-    worldViews[playerID] = new WorldView(playerID, viewWidth, viewHeight, world);
+    worldViews[playerID] = new WorldView( 0, 0, viewWidth, viewHeight, world);
   }
 
   // Get the slice of world data for the playerID
   const view = await worldViews[playerID].getCellsInView();
-  console.log(view);
 
+  console.log(worldViews);
   // Send the viewSlice back to the client
   res.json(view);
 });
