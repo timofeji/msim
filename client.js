@@ -166,7 +166,7 @@ async function processCommands() {
 
     // Handle the response from the server
     const result = await response.json();
-    console.log(result);
+    console.log(result.world);
   }
 }
 function updateTimestamp() {

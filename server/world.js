@@ -14,19 +14,30 @@ class WorldView {
     this.visibleChunks = new Map();
     this.world = world;
     this.updateVisibleChunks();
+
   }
 
-  async updateVisibleChunks() {
-    this.visibleChunks = [];
-    const chunkIds = this.getChunkIdsInView();
-    for (let i = 0; i < chunkIds.length; i++) {
-      try {
-        const chunkData = await this.world.getChunk(chunkIds[i]);
-        this.visibleChunks.push(chunkData);
-      } catch (error) {
-        console.error(`Error loading chunk ${chunkIds[i]}:`, error);
+  //   async updateVisibleChunks() {
+  //     this.visibleChunks = [];
+  //     const chunkIds = this.getChunkIdsInView();
+  //     for (let i = 0; i < chunkIds.length; i++) {
+  //       try {
+  //         const chunkData = await this.world.getChunk(chunkIds[i]);
+  //         this.visibleChunks.push(chunkData);
+  //       } catch (error) {
+  //         console.error(`Error loading chunk ${chunkIds[i]}:`, error);
+  //       }
+  //     }
+  //   }
+  updateVisibleChunks() {
+    const chunkIdsInView = this.getChunkIdsInView();
+
+    this.visibleChunks = chunkIdsInView.map((chunkId) => {
+      if (!this.world.chunks[chunkId]) {
+        this.world.loadChunkData(chunkId);
       }
-    }
+      return chunkId;
+    });
   }
 
   getChunkIdsInView() {
@@ -110,26 +121,23 @@ class World {
   }
 
   loadChunkData(chunkId) {
-    const chunkFilePath = path.join(this.chunksDirectory, `${chunkId}.txt`);
+    const filePath = path.join(this.chunksDirectory, `${chunkId}.txt`);
+    let chunkData;
 
-    if (!fs.existsSync(chunkFilePath)) {
-      // If the file doesn't exist, generate default chunk data and save it
-      const defaultChunkData = this.generateDefaultChunkData(chunkId);
-      this.saveChunkData(chunkId, defaultChunkData);
-      return defaultChunkData;
-    } else {
-      // If the file exists, read it and return the chunk data
-      const fileContent = fs.readFileSync(chunkFilePath, "utf8");
-      const lines = fileContent.split("\n").filter((line) => line);
-
-      const chunkData = {};
-      lines.forEach((line) => {
-        const [cord, cell] = line.split(",");
-        chunkData[cord] = cell;
-      });
-
-      return chunkData;
+    try {
+      chunkData = fs.readFileSync(filePath, "utf8");
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        // File does not exist, generate default chunk data
+        chunkData = this.generateDefaultChunkData();
+        this.saveChunkData(chunkId, chunkData);
+      } else {
+        console.error(`Error loading chunk ${chunkId}:`, error);
+        return;
+      }
     }
+
+    this.chunks[chunkId] = chunkData;
   }
 
   generateDefaultChunkData() {
@@ -145,26 +153,25 @@ class World {
     }
     return chunkData;
   }
+  getCellData(world, x, y) {
 
-  async getCellData(x, y) {
-    const chunkId = this.getChunkId(x, y);
-    const chunk = this.chunks[chunkId];
+    let chunkX = Math.floor(x / CHUNK_SIZE);
+    let chunkY = Math.floor(y / CHUNK_SIZE);
 
-    // If the chunk is not loaded, return a default character
-    if (!chunk) {
-      return "chunk error";
+    let cellX = x % CHUNK_SIZE;
+    let cellY = y % CHUNK_SIZE;
+
+
+    if (this.chunks.hasOwnProperty(`${chunkX},${chunkY}`)) {
+      let chunk = world.chunks[`${chunkX},${chunkY}`];
+
+    console.log(chunk);
+      let cell = chunk.cells[`${cellX},${cellY}`];
+      if (cell) {
+        return cell;
+      }
     }
-
-    const localX = x % CHUNK_SIZE;
-    const localY = y % CHUNK_SIZE;
-
-    // If the coordinates are within the loaded chunk, return the character at that position
-    if (chunk[localX] && chunk[localX][localY]) {
-      return chunk[localX][localY];
-    }
-
-    // If the coordinates are outside of the loaded chunk, return a default character
-    return "Z";
+    return "error chunk";
   }
 }
 
