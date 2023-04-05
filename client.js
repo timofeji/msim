@@ -66,8 +66,12 @@ function getTerrainColor(char) {
   return simulation_types[char] || "black";
 }
 
-
-
+function updateTimestamp() {
+  const timestampElement = document.getElementById('timestamp');
+  const unixTimestamp = Math.floor(Date.now() / 1000);
+  timestampElement.textContent = unixTimestamp;
+}
+setInterval(updateTimestamp, 1000);
 
 function isCellSelected(cell) {
   if (!selectionRectangle.start || !selectionRectangle.end) return false;

@@ -4,6 +4,8 @@ body, html {
   /* overflow: hidden; */
   display: flex;
   flex-direction: column;
+  color:white;
+  font-family: 'Noto Sans SC', monospace;
 }
 
 canvas {
@@ -51,7 +53,6 @@ header {
 }
 
 #game-input {
-  font-family: 'Noto Sans SC', monospace;
   box-sizing: border-box;
   display: block;
   margin: 1px;
