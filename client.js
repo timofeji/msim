@@ -1,7 +1,6 @@
 import { simulation_types } from "./simulation/types.js";
 
 const tileSize = 20;
-
 const canvas = document.getElementById("game-canvas");
 canvas.addEventListener('mousedown', handleMouseDown);
 canvas.addEventListener('mousemove', handleMouseMove);
@@ -10,29 +9,31 @@ canvas.addEventListener('mouseup', handleMouseUp);
 const inputBox = document.getElementById('game-input');
 
 var ctx = canvas.getContext("2d");
-// ctx.font = `${tileSize}px 'Courier New', monospace`; // Use a monospace font
-// ctx.textBaseline = 'middle'; // Adjust text rendering
-// ctx.textAlign = 'center';
-
- // Define the padding values
- const paddingRatio = 0.4;
- const xPadding = tileSize * paddingRatio;
- const yPadding = tileSize * paddingRatio;
-
- // Adjust the character size to include the padding
-
 var commandBuffer = [];
 var worldArray;
 
 async function fetchWorldData() {
-  const response = await fetch('/world');
-  worldArray = await response.json();
+  const viewWidth = Math.ceil(canvas.width / tileSize);
+  const viewHeight = Math.ceil(canvas.height / tileSize);
+  const playerID = "player1"; // Replace this with a unique identifier for the player
 
-  render();
+
+  const response = await fetch("/world", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ playerID, viewWidth, viewHeight }),
+  });
+  if (response.ok) {
+    worldArray = await response.json();
+    render();
+  } else {
+    console.error("Error fetching world data");
+  }
 }
+
 fetchWorldData();
-
-
 
 function getTerrainColor(char) {
   return simulation_types[char] || "black";
@@ -46,7 +47,7 @@ function isCellSelected(cell) {
   const maxY = Math.max(selectionRectangle.start.y, selectionRectangle.end.y);
 
   return (
-    cell.x >= minX && cell.x <= maxX && cell.y >= minY && cell.y <= maxY
+    cell.x >= minX && cell.x <= maxX && cell.y > minY && cell.y <= maxY
   );
 }
 
@@ -61,7 +62,7 @@ function render() {
       ctx.font = `${tileSize}px 'Noto Sans Mono CJK SC'`;
       ctx.textBaseline = "bottom";
       ctx.fillStyle = isSelected ? "white" : getTerrainColor(character);
-      ctx.rect(x, y, tileSize, tileSize);
+      
       ctx.fillText(character, x * tileSize, y * tileSize);
     }
   }
