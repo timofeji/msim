@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 class WorldView {
-  constructor( X, Y, viewWidth, viewHeight, world) {
+  constructor(X, Y, viewWidth, viewHeight, world) {
     this.x = X;
     this.y = Y;
     this.viewWidth = viewWidth;
@@ -17,20 +17,14 @@ class WorldView {
   }
 
   async updateVisibleChunks() {
+    this.visibleChunks = [];
     const chunkIds = this.getChunkIdsInView();
-
-    // Load all chunks within the view that are not already loaded
-    for (const chunkId of chunkIds) {
-      if (!this.visibleChunks.has(chunkId)) {
-        const chunkData = await this.world.getChunk(chunkId);
-        this.visibleChunks.set(chunkId, chunkData);
-      }
-    }
-
-    // Remove chunks that are no longer in view
-    for (const [chunkId] of this.visibleChunks) {
-      if (!chunkIds.includes(chunkId)) {
-        this.visibleChunks.delete(chunkId);
+    for (let i = 0; i < chunkIds.length; i++) {
+      try {
+        const chunkData = await this.world.getChunk(chunkIds[i]);
+        this.visibleChunks.push(chunkData);
+      } catch (error) {
+        console.error(`Error loading chunk ${chunkIds[i]}:`, error);
       }
     }
   }
@@ -84,17 +78,38 @@ class World {
   }
 
   async getChunk(chunkId) {
-    if (this.chunks[chunkId]) {
-      return this.chunks[chunkId];
+    try {
+      const chunkData = await this.loadChunkData(chunkId);
+      return chunkData;
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        // Chunk file not found, generate default chunk data
+        const defaultChunkData = this.generateDefaultChunkData(chunkId);
+        // Save default chunk data to disk
+        this.saveChunkData(chunkId, defaultChunkData);
+        return defaultChunkData;
+      } else {
+        // Unexpected error, rethrow
+        throw error;
+      }
     }
+  }
 
-    const chunkData = await this.loadChunkData(chunkId);
-    this.chunks[chunkId] = chunkData;
-    return chunkData;
+  saveChunkData(chunkId, chunkData) {
+    const chunkFilePath = path.join(this.chunksDirectory, `${chunkId}.txt`);
+  
+    // Convert the chunkData object to a string
+    let chunkDataString = '';
+    for (const [cord, cell] of Object.entries(chunkData)) {
+      chunkDataString += `${cord},${cell}\n`;
+    }
+  
+    // Write the chunk data string to a file
+    fs.writeFileSync(chunkFilePath, chunkDataString);
   }
 
   async loadChunkData(chunkId) {
-    const chunksDir = path.join(__dirname, 'chunks');
+    const chunksDir = path.join(__dirname, "chunks");
     const chunkPath = path.join(chunksDir, `${chunkId}.txt`);
 
     // Create the 'chunks' directory if it doesn't exist
@@ -104,10 +119,10 @@ class World {
 
     if (!fs.existsSync(chunkPath)) {
       const defaultChunkData = this.generateEmptyChunk();
-      fs.writeFileSync(chunkPath, defaultChunkData, 'utf8');
+      fs.writeFileSync(chunkPath, defaultChunkData, "utf8");
     }
 
-    const chunkData = fs.readFileSync(chunkPath, 'utf8');
+    const chunkData = fs.readFileSync(chunkPath, "utf8");
     return chunkData;
   }
 
@@ -147,46 +162,6 @@ class World {
   }
 }
 
-
-
-// class World {
-//   constructor() {
-//     this.worldMap = new Map();
-//   }
-
-//   set(x, y, character) {
-//     const key = `${x},${y}`;
-//     this.worldMap.set(key, character);
-//   }
-
-//   get(x, y) {
-//     const key = `${x},${y}`;
-//     return this.worldMap.get(key);
-//   }
-
-//   delete(x, y) {
-//     const key = `${x},${y}`;
-//     this.worldMap.delete(key);
-//   }
-
-//   has(x, y) {
-//     const key = `${x},${y}`;
-//     return this.worldMap.has(key);
-//   }
-
-//   loadFromFile(filePath) {
-//     const fileContent = fs.readFileSync(filePath, "utf8");
-//     const lines = fileContent.trim().split("\n");
-
-//     for (let y = 0; y < lines.length; y++) {
-//       const line = lines[y];
-//       for (let x = 0; x < line.length; x++) {
-//         const character = line[x];
-//         this.set(x, y, character);
-//       }
-//     }
-//   }
-// }
 
 module.exports = {
   WorldView : WorldView,
