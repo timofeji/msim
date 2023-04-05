@@ -12,7 +12,6 @@ const fs = require('fs');
 const { World, WorldView } = require("./server/world");
 
 const world = new World();
-world.loadFromFile('world.txt');
 
 app.use(express.static(__dirname));
 
@@ -25,16 +24,6 @@ const worldViews = {};
 
 // Define a route to serve the game world data
 app.get("/world", (req, res) => {
-  // const worldArray = [];
-  // for (const [key, character] of world.worldMap.entries()) {
-  //   const [x, y] = key.split(",").map(Number);
-  //   const cell = `${x},${y},${character}`;
-  //   worldArray.push(cell);
-  // }
-
-  // // Return the world map data as JSON
-  // res.json(worldArray);
-
   const { viewWidth, viewHeight, playerID } = req.body;
 
   // Check if there's already a WorldView instance for this playerID
@@ -44,7 +33,7 @@ app.get("/world", (req, res) => {
   }
 
   // Get the slice of world data for the playerID
-  const view = worldViews[playerID].getView();
+  const view = worldViews[playerID].getViewData();
 
   // Send the viewSlice back to the client
   res.json(view);
