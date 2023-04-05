@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 class World {
   constructor() {
     this.worldMap = new Map();
@@ -22,4 +24,20 @@ class World {
     const key = `${x},${y}`;
     return this.worldMap.has(key);
   }
+
+  loadFromFile(filePath) {
+    const fileContent = fs.readFileSync(filePath, "utf8");
+    const lines = fileContent.trim().split("\n");
+
+    for (let y = 0; y < lines.length; y++) {
+      const line = lines[y];
+      for (let x = 0; x < line.length; x++) {
+        const character = line[x];
+        this.set(x, y, character);
+      }
+    }
+  }
 }
+
+
+module.exports = World;

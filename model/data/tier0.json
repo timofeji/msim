@@ -1,0 +1,26 @@
+[
+  {
+    "input": "火水",
+    "output": "煤油"
+  },
+  {
+    "input": "火土",
+    "output": "灰烬"
+  },
+  {
+    "input": "水木",
+    "output": "纸张"
+  },
+  {
+    "input": "水金",
+    "output": "酒"
+  },
+  {
+    "input": "木火",
+    "output": "木炭"
+  },
+  {
+    "input": "木金",
+    "output": "箭"
+  }
+]
