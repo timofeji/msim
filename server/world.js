@@ -3,6 +3,8 @@ const CHUNK_SIZE = 10; // Define your desired chunk size
 
 
 const fs = require('fs');
+const path = require('path');
+
 class WorldView {
   constructor( X, Y, viewWidth, viewHeight, world) {
     this.x = X;
@@ -92,28 +94,38 @@ class World {
   }
 
   async loadChunkData(chunkId) {
-    try {
-      const chunkData = await fs.promises.readFile(`./chunks/${chunkId}.txt`, "utf8");
-      return JSON.parse(chunkData);
-    } catch (error) {
-      console.error(`Error loading chunk data for chunk ID ${chunkId}:`, error);
-      return this.generateEmptyChunk();
+    const chunksDir = path.join(__dirname, 'chunks');
+    const chunkPath = path.join(chunksDir, `${chunkId}.txt`);
+
+    // Create the 'chunks' directory if it doesn't exist
+    if (!fs.existsSync(chunksDir)) {
+      fs.mkdirSync(chunksDir);
     }
+
+    if (!fs.existsSync(chunkPath)) {
+      const defaultChunkData = this.generateEmptyChunk();
+      fs.writeFileSync(chunkPath, defaultChunkData, 'utf8');
+    }
+
+    const chunkData = fs.readFileSync(chunkPath, 'utf8');
+    return chunkData;
   }
 
   generateEmptyChunk() {
-    const chunkData = {};
-    for (let x = 0; x < CHUNK_SIZE; x++) {
-      for (let y = 0; y < CHUNK_SIZE; y++) {
-        const cellId = `${x},${y}`;
-        chunkData[cellId] = "Z";
+    const defaultChar = "空";
+    let chunkData = "";
+    for (let row = 0; row < CHUNK_SIZE; row++) {
+      for (let col = 0; col < CHUNK_SIZE; col++) {
+        chunkData += defaultChar;
+      }
+      if (row < CHUNK_SIZE - 1) {
+        chunkData += "\n";
       }
     }
     return chunkData;
   }
 
   async getCellData(x, y) {
-
     const chunkId = this.getChunkId(x, y);
     const chunk = this.chunks[chunkId];
 
@@ -133,7 +145,6 @@ class World {
     // If the coordinates are outside of the loaded chunk, return a default character
     return "Z";
   }
-
 }
 
 
