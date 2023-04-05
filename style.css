@@ -1,23 +1,38 @@
-body {
-  font-family: 'Courier New', Courier, monospace;
-  background-color: #231515;
-  color: #ffffff;
+body, html {
   margin: 0;
-  height: 100%;
-  width: 100%;
-
+  padding: 0;
+  /* overflow: hidden; */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  position: absolute;
-
-  font-family: 'Noto Sans SC', serif;
 }
+
 canvas {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
 
+header {
+  position: fixed;
+  align-items: center;
+  padding: 10px;
+}
+
+#game-container {
+  /* top: 100px; */
+  /* position: relative; */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#company-logo {
+  height: 40px;
+  margin-right: 20px;
+}
+
+#timestamp {
+  font-size: 18px;
+}
 #game-canvas {
   display: block;
   height: 100%;

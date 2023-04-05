@@ -90,6 +90,7 @@ function render() {
       const [x, y, character] = cell.split(",");
       const isSelected = isCellSelected({ x, y });
       ctx.fillStyle = isSelected ? "white" : getTerrainColor(character);
+      ctx.rect(x, y, tileSize, tileSize);
       ctx.fillText(character, x * tileSize, y * tileSize);
     }
   }
@@ -164,9 +165,12 @@ inputBox.addEventListener('keydown', (event) => {
 });
 
 function setCanvasSize() {
-  const inputBoxHeight = inputBox.getBoundingClientRect().height;
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight - inputBoxHeight;
+  const container = document.getElementById("game-container");
+  const containerWidth = container.clientWidth;
+  const containerHeight = container.clientHeight;
+
+  canvas.width = containerWidth;
+  canvas.height = containerHeight;
 }
 
 window.addEventListener('resize', () => {
