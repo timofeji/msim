@@ -3,6 +3,10 @@ import { simulation_types } from "./simulation/types.js";
 const tileSize = 20;
 
 const canvas = document.getElementById("game-canvas");
+canvas.addEventListener('mousedown', handleMouseDown);
+canvas.addEventListener('mousemove', handleMouseMove);
+canvas.addEventListener('mouseup', handleMouseUp);
+
 const inputBox = document.getElementById('game-input');
 
 var ctx = canvas.getContext("2d");
@@ -64,28 +68,73 @@ function getTerrainColor(char) {
 
 
 
+
+function isCellSelected(cell) {
+  if (!selectionRectangle.start || !selectionRectangle.end) return false;
+
+  const minX = Math.min(selectionRectangle.start.x, selectionRectangle.end.x);
+  const maxX = Math.max(selectionRectangle.start.x, selectionRectangle.end.x);
+  const minY = Math.min(selectionRectangle.start.y, selectionRectangle.end.y);
+  const maxY = Math.max(selectionRectangle.start.y, selectionRectangle.end.y);
+
+  return (
+    cell.x >= minX && cell.x <= maxX && cell.y >= minY && cell.y <= maxY
+  );
+}
+
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (worldArray) {
     for (const cell of worldArray) {
       const [x, y, character] = cell.split(",");
-      const xPos = x * tileSize;
-      const yPos = y * tileSize;
-      ctx.fillStyle = getTerrainColor(character);
-      ctx.fillText(character, xPos, yPos);
-      console.log(cell);
+      const isSelected = isCellSelected({ x, y });
+      ctx.fillStyle = isSelected ? "white" : getTerrainColor(character);
+      ctx.fillText(character, x * tileSize, y * tileSize);
     }
   }
+}
 
+let isMouseDown = false;
 
+let selectionRectangle = {
+  start: null,
+  end: null,
+};
 
+function getCellFromCoordinates(offsetX, offsetY) {
+  const x = Math.floor(offsetX / tileSize);
+  const y = Math.floor(offsetY / tileSize);
 
-  // for (let y = 0; y < testGrid.length; y++) {
-  //   for (let x = 0; x < testGrid[y].length; x++) {
-  //     const character = testGrid[y][x];
-  //   }
-  // }
+  return { x, y };
+}
+
+function handleMouseDown(event) {
+  const { offsetX, offsetY } = event;
+  const cell = getCellFromCoordinates(offsetX, offsetY);
+
+  if (cell) {
+    isMouseDown = true;
+    selectionRectangle.start = cell;
+    selectionRectangle.end = cell;
+  }
+}
+
+function handleMouseMove(event) {
+  if (!isMouseDown) return;
+
+  const { offsetX, offsetY } = event;
+  const cell = getCellFromCoordinates(offsetX, offsetY);
+
+  if (cell) {
+    selectionRectangle.end = cell;
+  }
+
+  render();
+}
+
+function handleMouseUp(event) {
+  isMouseDown = false;
 }
 
 
@@ -104,7 +153,6 @@ function handleInput(inputText) {
   // Add the command object to the command buffer
   commandBuffer.push(command);
 
-  console.log(commandBuffer);
 }
 
 inputBox.addEventListener('keydown', (event) => {
@@ -144,8 +192,6 @@ async function processCommands() {
     console.log(result);
   }
 }
-
-// Call the processCommands function periodically
 setInterval(processCommands, 1000);
 
 function getCursorPosition(canvas, event) {
@@ -164,20 +210,3 @@ function getCellAtPosition(mousePos) {
     return null;
   }
 }
-
-
-
-function renderHighlight(ctx, cellPos) {
-  if (cellPos) {
-    ctx.strokeStyle = '#FF0000';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(cellPos.x * tileSize, cellPos.y * tileSize, tileSize, tileSize);
-  }
-}
-
-canvas.addEventListener('mousemove', function(event) {
-  const mousePos = getCursorPosition(canvas, event);
-  const cellPos = getCellAtPosition(mousePos);
-  const ctx = canvas.getContext('2d');
-  renderHighlight(ctx, cellPos);
-});
