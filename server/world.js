@@ -3,7 +3,6 @@ const CHUNK_SIZE = 10; // Define your desired chunk size
 
 
 const fs = require('fs');
-
 class WorldView {
   constructor(playerID, X, Y, viewWidth, viewHeight) {
     this.player = playerID;
@@ -36,24 +35,43 @@ class WorldView {
   getChunkIdsInView() {
     const topLeftChunk = this.world.getChunkId({ x: this.x - this.viewWidth / 2, y: this.y - this.viewHeight / 2 });
     const bottomRightChunk = this.world.getChunkId({ x: this.x + this.viewWidth / 2, y: this.y + this.viewHeight / 2 });
-  
-    const [topLeftChunkX, topLeftChunkY] = topLeftChunk.split(',').map(Number);
-    const [bottomRightChunkX, bottomRightChunkY] = bottomRightChunk.split(',').map(Number);
-  
+
+    const [topLeftChunkX, topLeftChunkY] = topLeftChunk.split(",").map(Number);
+    const [bottomRightChunkX, bottomRightChunkY] = bottomRightChunk.split(",").map(Number);
+
     const visibleChunkIds = [];
-  
+
     for (let x = topLeftChunkX; x <= bottomRightChunkX; x++) {
       for (let y = topLeftChunkY; y <= bottomRightChunkY; y++) {
         visibleChunkIds.push(`${x},${y}`);
       }
     }
-  
+
     return visibleChunkIds;
+  }
+
+  async getCellsInView() {
+    const startX = Math.max(this.x - Math.floor(this.viewWidth / 2), 0);
+    const startY = Math.max(this.y - Math.floor(this.viewHeight / 2), 0);
+    const endX = startX + this.viewWidth;
+    const endY = startY + this.viewHeight;
+
+    const cells = [];
+
+    for (let x = startX; x < endX; x++) {
+      for (let y = startY; y < endY; y++) {
+        const cell = this.getCell(x, y);
+        cells.push({ x, y, char: cell });
+      }
+    }
+
+    return cells;
   }
 }
 class World {
   constructor() {
     this.chunks = {};
+    this.players = {};
   }
 
   getChunkId(position) {
@@ -92,6 +110,7 @@ class World {
     }
     return chunkData;
   }
+
 }
 
 
